@@ -6,7 +6,7 @@ to determine how C++11 gives types to expressions, variables, and template
 typenames is not always easy.
 
 Programmers can get a string-based representation of an expressions type by
-using "typeid(expr).name()".  However, the returned string is often cryptic
+using "`typeid(expr).name()`".  However, the returned string is often cryptic
 (with mangled names) or unreliable (C++11 requires that typeid present
 information back as though the expression were passed to a template).  In
 "Effective Modern C++" Scott Meyers presents a trick that overcomes these
@@ -18,9 +18,9 @@ this tedius task by automating the process for you.
 
 To understand what the Deduction Explorer does, it helps to understand the
 trick Scott Meyer Presents in "Effective Modern C++".  I've recreated this
-trick as the 'whatTheHellAreYou' macro in the following code:
+trick as the `whatTheHellAreYou` macro in the following code:
 
-<pre>
+``` c++
 template<typename T>
 class IAmA;
 
@@ -32,13 +32,13 @@ int main(int argc, char \*argv[]) {
     int const & y = x;
     whatTheHellAreYou(y);
 }
-</pre>
+```
 
 What the macro does is try and instantiate a template that is declared but not
 defined.  When the compiler (in this case gcc 4.8.3) fails to instantiate the
 undefined template it presents the following error:
 
-<pre>
+'''
 ./test.cpp: In function ‘int main(int, char\*\*)’:
 ./test.cpp:6:26: error: aggregate ‘IAmA<const int&> blah’ has incomplete type and cannot be defined
      IAmA<decltype(expr)> blah;
@@ -46,11 +46,11 @@ undefined template it presents the following error:
 ./test.cpp:11:5: note: in expansion of macro ‘whatTheHellAreYou’
      whatTheHellAreYou(y);
      ^
-</pre>
+'''
 
-In the highlighted portion, the error message reveals that y's type is, as we
-expect, a const int&.  Things get more interesting when we use
-'whatTheHellAreYou' in the context of a template:
+The error message reveals that y's type is, as we
+expect, a `const int&`.  Things get more interesting when we use
+`whatTheHellAreYou` in the context of a template:
 
 <pre>
 template<typename T>
@@ -78,7 +78,7 @@ In this context gcc presents the following error:
      ^
 </pre>
 
-This message shows that both T and param are inferred to be "const int&".
+This message shows that both `T` and `param` are inferred to be `const int&`.
 
 # How the tool helps
 
@@ -142,7 +142,8 @@ This script generates this table by substituting the value in the "SUBSTITUTION"
 
 # How to Use
 
-To run just execute generator.py.
-To modify what to substitute modify the 'substitutions' list.
+* Make sure you have gcc installed.  This tool is known to work with gcc 4.8.3.
+* To run just execute `generator.py`
+* To modify what is substituted, modify the 'substitutions' list in `generator.py`
 
 For more details, read the comments at the top of the generator file <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/generator.py>.
