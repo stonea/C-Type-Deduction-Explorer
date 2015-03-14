@@ -1,7 +1,26 @@
 # C-Type-Deduction-Explorer
 A hacked up Python script to help developers explore and learn C++11's type deduction rules.
 
-Briefly, this tool uses g++ with -std=c++11 to generate the following table:
+Briefly, this tool uses g++ with -std=c++11 to generate the below table.  Each row of the table lists what C++11 will deduce the value of T and x to be when instantiating one of the following templates.  
+
+<pre>
+ int        value            = 1;
+ const int  constValue       = 2;
+ int&       reference        = value;
+ const int& constReference   = value;
+
+template<typename T>
+void lval(T& x) { whatTheHellAreYou(x); }
+
+template<typename T>
+void lvalConst(T const & x) { whatTheHellAreYou(x); }
+
+template<typename T>
+void rval(T&& x) { whatTheHellAreYou(x); }
+</pre>
+
+For example, if we were to call 'lval(constValue)',  the lval template will be instantiated with the type of T being 'int' and the type of 'x' being const 'int&'.
+
 
 <pre>
  .-----------------------------------------------------------------------------------------------.
@@ -42,10 +61,12 @@ Briefly, this tool uses g++ with -std=c++11 to generate the following table:
  | whatTheHellAreYou( auto_cref_constReference )   |                 None |           const int& |
  `----------------------------------------------------------------------------------------------'
  </pre>
-By repeadetly substituting the value in the "SUBSTITUTION" column, in the place marked SUBSTITUTION_POINT in this file:
-<https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/templateFile.cpp>.
+ 
+This script generates this table by substituting the value in the "SUBSTITUTION" column, in the place marked SUBSTITUTION_POINT in this file: <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/templateFile.cpp>.  The script runs the file through file is then run through gcc and type information is extracted in gcc's error messages.
 
-Too run just execute generator.py.
+# How to Use
+
+To run just execute generator.py.
 To modify what to substitute modify the 'substitutions' list.
 
 For more details, read the comments at the top of the generator file <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/generator.py>.
