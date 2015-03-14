@@ -11,10 +11,10 @@ using "`typeid(expr).name()`".  However, the returned string is often cryptic
 information back as though the expression were passed to a template).  In
 "Effective Modern C++" Scott Meyers presents a trick that overcomes these
 issues by having the compiler produce a compile-time error, which presents type
-information back to the user.  However, it can be tedious to repeadely set up
+information back to the user.  However, it can be tedious to repeatedly set up
 code to produce an error, run the compiler, and extract type information from
 the error messages.  Luckily the "Type Deduction Explorer" tool eliminates
-this tedius task by automating the process for you.
+this tedious task by automating the process for you.
 
 To understand what the Deduction Explorer does, it helps to understand the
 trick Scott Meyer Presents in "Effective Modern C++".  I've recreated this
