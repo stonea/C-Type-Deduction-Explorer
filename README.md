@@ -1,4 +1,4 @@
-# C-Type-Deduction-Explorer
+# The C++ Type Deduction Explorer
 The C++ Type Deduction Explorer is a utility to help programmers learn and
 explore how C++11 compilers perform type deduction.  Often the most effective
 way to learn a new language feature is to play around with it.  However, trying
