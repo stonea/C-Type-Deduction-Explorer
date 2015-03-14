@@ -52,7 +52,7 @@ The error message reveals that y's type is, as we
 expect, a `const int&`.  Things get more interesting when we use
 `whatTheHellAreYou` in the context of a template:
 
-<pre>
+''' c++
 template<typename T>
 void foo(T&& param) {
     whatTheHellAreYou(param);
@@ -63,7 +63,7 @@ int main(int argc, char \*argv[]) {
     int const & y = x;
     foo(y);
 }
-</pre>
+'''
 
 In this context gcc presents the following error:
 
