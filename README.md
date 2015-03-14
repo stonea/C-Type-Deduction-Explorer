@@ -52,7 +52,7 @@ The error message reveals that y's type is, as we
 expect, a `const int&`.  Things get more interesting when we use
 `whatTheHellAreYou` in the context of a template:
 
-''' c++
+``` c++
 template<typename T>
 void foo(T&& param) {
     whatTheHellAreYou(param);
@@ -63,7 +63,7 @@ int main(int argc, char \*argv[]) {
     int const & y = x;
     foo(y);
 }
-'''
+```
 
 In this context gcc presents the following error:
 
@@ -86,7 +86,7 @@ Briefly, this tool uses g++ with -std=c++11 to generate the below table.  Each
 row of the table lists what C++11 will deduce the value of T and x to be when
 instantiating one of the following templates.  
 
-<pre>
+``` c++
  int        var              = 1;
  const int  constValue       = 2;
  int&       reference        = var;
@@ -103,9 +103,9 @@ void lvalConstRef(T const & x) { whatTheHellAreYou(x); }
 
 template<typename T>
 void rvalRef(T&& x) { whatTheHellAreYou(x); }
-</pre>
+```
 
-For example, if we were to call 'lvalRef(constValue)',  the lvalRef template will be instantiated with the type of T being 'int' and the type of 'x' being const 'int&'.
+For example, if we were to call 'lvalRef(constValue)',  the lvalRef template will be instantiated with the type of `T` being `int` and the type of `x` being `const int&`.
 
 <pre>
  .---------------------------------------------------------------------------------------------------------,
