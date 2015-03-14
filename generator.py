@@ -21,10 +21,15 @@
 #             - Regardless of where 'whatTheHellAreYou' is invoked, we can extract the type of the expression passed to
 #               this macro.
 #
-#   For example, if (in templateFile.cpp) we substitute SUBSTITUTION_POINT with 'lval(value)', then compile it
-#   with 'gcc -std=c++ templatefile.cpp', gcc will print the following (cryptic) error messages:
+#   For example, if (in templateFile.cpp) we substitute SUBSTITUTION_POINT with 'lvalRef(var)', where var is an integer
+#   variable and lval is the following function template:
 #
-#       ./templateFile.cpp: In instantiation of 'void lval(T&) [with T = int]':
+#      template<typename T>
+#      void lvalRef(T& x) { whatTheHellAreYou(x); }
+#
+#   then when we compile it with 'gcc -std=c++ templatefile.cpp', gcc will print the following (cryptic) error messages:
+#
+#       ./templateFile.cpp: In instantiation of 'void lvalRef(T&) [with T = int]':
 #       ./templateFile.cpp:27:15:   required from here
 #       ./templateFile.cpp:9:26: error: 'IAmA<int&> blah' has incomplete type
 #            IAmA<decltype(expr)> blah;
@@ -43,39 +48,57 @@ import re;
 
 # Substitutions to make.  Have fun and insert your own:
 # Have even more fun, change the code in 'templateFile.cpp'.
-substitutions = ["lval( value )",
-                 "lval( constValue )",
-                 "lval( reference )",
-                 "lval( constReference )",
-                 "lval( 42 )",
+substitutions = [
+                 "whatTheHellAreYou( var )",
+                 "whatTheHellAreYou( constVar )",
+                 "whatTheHellAreYou( reference )",
+                 "whatTheHellAreYou( constReference )",
+                 "whatTheHellAreYou( 42 )",
                  "",
-                 "lvalConst( value )",
-                 "lvalConst( constValue )",
-                 "lvalConst( reference )",
-                 "lvalConst( constReference )",
-                 "lvalConst( 42 )",
+                 "lvalRef( var )",
+                 "lvalRef( constVar )",
+                 "lvalRef( reference )",
+                 "lvalRef( constReference )",
+                 "lvalRef( 42 )",
                  "",
-                 "rval( value)",
-                 "rval( constValue)",
-                 "rval( reference)",
-                 "rval( constReference)",
-                 "rval( 42 )",
+                 "lvalConstRef( var )",
+                 "lvalConstRef( constVar )",
+                 "lvalConstRef( reference )",
+                 "lvalConstRef( constReference )",
+                 "lvalConstRef( 42 )",
                  "",
-                 "whatTheHellAreYou( auto_value )",
-                 "whatTheHellAreYou( auto_constValue )",
-                 "whatTheHellAreYou( auto_reference )",
-                 "whatTheHellAreYou( auto_constReference )",
-                 "whatTheHellAreYou( auto_42 )",
-                 "",
-                 "whatTheHellAreYou( auto_ref_value )",
-                 "whatTheHellAreYou( auto_ref_constValue )",
-                 "whatTheHellAreYou( auto_ref_reference )",
-                 "whatTheHellAreYou( auto_ref_constReference )",
-                 "",
-                 "whatTheHellAreYou( auto_cref_value )",
-                 "whatTheHellAreYou( auto_cref_constValue )",
-                 "whatTheHellAreYou( auto_cref_reference )",
-                 "whatTheHellAreYou( auto_cref_constReference )"
+                 "rvalRef( var )",
+                 "rvalRef( constVar )",
+                 "rvalRef( reference )",
+                 "rvalRef( constReference )",
+                 "rvalRef( 42 )",
+                 ""
+                 #"whatTheHellAreYou( auto_var )",
+                 #"whatTheHellAreYou( auto_constVar )",
+                 #"whatTheHellAreYou( auto_reference )",
+                 #"whatTheHellAreYou( auto_constReference )",
+                 #"",
+                 #"whatTheHellAreYou( auto_ref_var )",
+                 #"whatTheHellAreYou( auto_ref_constVar )",
+                 #"whatTheHellAreYou( auto_ref_reference )",
+                 #"whatTheHellAreYou( auto_ref_constReference )",
+                 #"",
+                 #"whatTheHellAreYou( auto_cref_var )",
+                 #"whatTheHellAreYou( auto_cref_constVar )",
+                 #"whatTheHellAreYou( auto_cref_reference )",
+                 #"whatTheHellAreYou( auto_cref_constReference )"
+                 #"",
+                 #"whatTheHellAreYou( array )",
+                 #"justVal( array )",
+                 #"lval( array )",
+                 #"" ,
+                 #"whatTheHellAreYou( initList )",
+                 #"justVal( initList )",
+                 #"lval( initList )",
+                 #"" ,
+                 #"whatTheHellAreYou( fcn )",
+                 #"justVal( fcn )",
+                 #"lval( fcn )",
                 ];
 
 #-------------------------------
@@ -93,10 +116,22 @@ print '    ', '     '.join(inputFile)
 #-------------------------------
 
 subColWidth = len(max(substitutions, key=len)) + 2
-print " .%s%s" % ("-" * subColWidth, "------------------------------------------------.")
-print " | SUBSTITUTION%s%s" % (" " * (subColWidth - len("SUBSTITUTION")), " |            type of T |         type of expr |")
-print " |%s%s" % ("-" * subColWidth, "------------------------------------------------|")
-tableFormat = " | %%-%ds | %%20s | %%20s |" % subColWidth
+typeColWidth = 30;
+colHeader0 = "SUBSTITUTION"
+colHeader1 = "type of T"
+colHeader2 = "type of expr"
+col0SpaceAfterLabel = subColWidth  - len(colHeader0)
+col1SpaceAfterLabel = typeColWidth - len(colHeader1)
+col2SpaceAfterLabel = typeColWidth - len(colHeader2)
+tableFormat = " | %%-%ds | %%-%ds | %%-%ds |" % (subColWidth, typeColWidth, typeColWidth)
+
+print " .%s%s," % ("-" * (subColWidth), "-" * (typeColWidth*2+8))
+print " | %s%s | %s%s | %s%s |" % (
+     colHeader0, " " * col0SpaceAfterLabel,
+     colHeader1, " " * col1SpaceAfterLabel,
+     colHeader2, " " * col2SpaceAfterLabel)
+print " |%s|" % ("-" * (subColWidth + typeColWidth*2 + 8))
+
 
 #-------------------------------
 # Generate rows of table (one row for each substitution to make)
@@ -138,4 +173,4 @@ for sub in substitutions:
 #-------------------------------
 # Print table footer                                      
 #-------------------------------
-print " `%s%s" % ("-" * subColWidth, "-----------------------------------------------'")
+print " `%s%s'" % ("-" * (subColWidth), "-" * (typeColWidth*2+8))

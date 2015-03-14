@@ -48,5 +48,5 @@ int main(int argc, char *argv[]) {
     double fcn(int, int);
     double (*)(int, int) fcnPtr = fcn;
 
-    SUBSTITUTION_POINT
+    rvalRef( 42 );
 }
