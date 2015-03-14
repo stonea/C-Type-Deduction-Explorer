@@ -13,7 +13,7 @@ information back as though the expression were passed to a template).  In
 issues by having the compiler produce a compile-time error, which presents type
 information back to the user.  However, it can be tedious to repeadely set up
 code to produce an error, run the compiler, and extract type information from
-the ese error messages.  Luckily the "Type Deduction Explorer" tool eliminates
+the error messages.  Luckily the "Type Deduction Explorer" tool eliminates
 this tedius task by automating the process for you.
 
 To understand what the Deduction Explorer does, it helps to understand the
