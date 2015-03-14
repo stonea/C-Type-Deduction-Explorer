@@ -27,7 +27,7 @@ class IAmA;
 #define whatTheHellAreYou(expr) \
     IAmA<decltype(expr)> blah;
 
-int main(int argc, char \*argv[]) {
+int main(int argc, char *argv[]) {
     int x = 42;
     int const & y = x;
     whatTheHellAreYou(y);
@@ -38,15 +38,15 @@ What the macro does is try and instantiate a template that is declared but not
 defined.  When the compiler (in this case gcc 4.8.3) fails to instantiate the
 undefined template it presents the following error:
 
-'''
-./test.cpp: In function ‘int main(int, char\*\*)’:
+```
+./test.cpp: In function ‘int main(int, char**)’:
 ./test.cpp:6:26: error: aggregate ‘IAmA<const int&> blah’ has incomplete type and cannot be defined
      IAmA<decltype(expr)> blah;
                           ^
 ./test.cpp:11:5: note: in expansion of macro ‘whatTheHellAreYou’
      whatTheHellAreYou(y);
      ^
-'''
+```
 
 The error message reveals that y's type is, as we
 expect, a `const int&`.  Things get more interesting when we use
@@ -58,7 +58,7 @@ void foo(T&& param) {
     whatTheHellAreYou(param);
 }
 
-int main(int argc, char \*argv[]) {
+int main(int argc, char *argv[]) {
     int x = 42;
     int const & y = x;
     foo(y);
@@ -67,7 +67,7 @@ int main(int argc, char \*argv[]) {
 
 In this context gcc presents the following error:
 
-<pre>
+```
 ./test.cpp: In instantiation of ‘void foo(T&&) [with T = const int&]’:
 ./test.cpp:16:10:   required from here
 ./test.cpp:6:26: error: ‘IAmA<const int&> blah’ has incomplete type
@@ -76,7 +76,7 @@ In this context gcc presents the following error:
 ./test.cpp:10:5: note: in expansion of macro ‘whatTheHellAreYou’
      whatTheHellAreYou(param);
      ^
-</pre>
+```
 
 This message shows that both `T` and `param` are inferred to be `const int&`.
 
