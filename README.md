@@ -396,12 +396,19 @@ deduce to an initializor list, for templates the braces are an error:
 
 And that's it!  See C++11 type deduction isn't too hairy.
 
-For more fun you may want to use the tool to see how functions and array types
-decay.  In other words take the following and put them into the
-`whatTheHellAreYou` macro and our template functions and see how the types are
-deduced:
+Here's some ideas of additional things you can explore with the tool:
 
-``` C++
-  int array[10];
-  double fcn(int, int);
+
+* Get a grasp of how function and array types decay by defining an array such
+as `int array[10];` and declaring a function like `double fcn(int, int);` and
+passing them to the `whatTheHellAreYou` maro.
+
+* Get a grasp on how std::move works.  For example by trying
+`whatTheHellAreYou(std::move( var ))`.
+
+* Get a grasp on how std::forward works by making new functions in templateFile.cpp such as:
 ```
+template<typename T>
+void lval_fwd(T x) { whatTheHellAreYou(std::forward<decltype(x)>(x)); }
+```
+

@@ -27,8 +27,8 @@ void rvalRef(T&& x) { whatTheHellAreYou(x); }
 
 int returnInt() { return 42; }
 int const returnConstInt() { return 42; }
-int& returnRefToInt() { static var = 42; return var; }
-int const & returnRefToConstInt()  { static var = 42; return var; }
+int& returnRefToInt() { static int var = 42; return var; }
+int const & returnRefToConstInt()  { static int var = 42; return var; }
 
 int main(int argc, char *argv[]) {
     int        var              = 1;
