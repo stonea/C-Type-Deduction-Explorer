@@ -1,20 +1,20 @@
 # The C++ Type Deduction Explorer
 The C++ Type Deduction Explorer is a utility to help programmers learn and
-explore how C++11 compilers perform type deduction.  Often the most effective
-way to learn a new language feature is to play around with it.  However, trying
-to determine how C++11 gives types to expressions, variables, and template
-typenames is not always easy.
+explore how C++11 compilers deduce types.  Often the most effective way to
+learn a new language feature is to play around with it.  However, by itself
+C++11 doesn't make it easy to explore what variables, expressions, and template
+typenames are deduced to be.
 
-Programmers can get a string-based representation of an expression's type by
-using `typeid(expr).name()`.  However, the returned string is often cryptic
-(with mangled names) or unreliable (C++11 requires that typeid present
-information back as though the expression were passed to a template).  In
-"Effective Modern C++" Scott Meyers presents a trick that overcomes these
-issues.  He suggests using an undefined template produce a compile-time error
-that presents type information back to the user.  The trick works, but it can
-be tedious to repeatedly set up code to produce an error, run the compiler, and
-extract type information from the error messages.  Luckily the "Type Deduction
-Explorer" tool eliminates this tedious task by automating the process for you.
+Although programmers can get a string-based representation of an expression's
+type by using `typeid(expr).name()`, this string is often cryptic (with mangled
+names) or unreliable (C++11 requires that typeid present information back as
+though the expression were passed to a template).  In "Effective Modern C++"
+Scott Meyers presents a trick to overcome these issues.  He suggests using an
+undefined template to produce a compile-time error that presents type
+information back to the user.  The trick works, but it can be tedious to
+repeatedly set up code to produce an error, run the compiler, and extract type
+information from the error messages.  Luckily the "Type Deduction Explorer"
+tool eliminates this tedious task by automating the process for you.
 
 To understand what the Deduction Explorer does, it helps to understand the
 trick Scott Meyer Presents in "Effective Modern C++".  I've recreated this
@@ -179,8 +179,8 @@ the first two of these cases individually:
 
 ## Template Type Deduction
 
-Imagine a template: `template<typename T> void foo(...param-decl...)`.  There
-are different forms param-decl might take:
+Given a template: `template<typename T> void foo(...param-decl...)`.  There are
+different forms param-decl might take:
 
 * `template<typename T> void foo(T param)` (without any qualifiers)
 * `template<typename T> void foo(T* param)` (a pointer)
@@ -286,7 +286,7 @@ T will deduce to the reference `int&`.
  
 ## Auto Type Deduction
 
-In this section imagine the following functions and variables:
+Now, to learn auto type deduction, suppose we have the following variables:
 
 ``` c++
 int returnInt() { return 42; }
@@ -343,7 +343,6 @@ qualifiers on auto being stuck on.
  .----------------------------------------------------------------,
  | SUBSTITUTION                                    | type of expr |
  |----------------------------------------------------------------|
- |                                                 |              |
  | whatTheHellAreYou( auto_ref_var )               | int&         |
  | whatTheHellAreYou( auto_ref_constVar )          | const int&   |
  | whatTheHellAreYou( auto_ref_reference )         | int&         |
@@ -378,19 +377,19 @@ r-value, what results is an r-value.
 
 There is one way type deduction of auto differs with type deduction of
 templates: when things are enclosed in curly braces.  For auto curly braces
-deduce to an initializor list, for templates the braces are an error:
+deduce to an initializor list, for templates the braces are an error
+(hence we list None in the column):
 
 ```
- .---------------------------------------------------------------------------------------------,
- | SUBSTITUTION                    | type of T                   | type of expr                |
- |---------------------------------------------------------------------------------------------|
- |                                 |                             |                             |
- | whatTheHellAreYou( initList )   | None                        | std::initializer_list<int>  |
- | lval( {1,2,3,4,5} )             | None                        | None                        |
- | lvalConst( {1,2,3,4,5} )        | None                        | None                        |
- | lvalRef( {1,2,3,4,5} )          | None                        | None                        |
- | lvalConstRef( {1,2,3,4,5} )     | None                        | None                        |
- | rvalRef( {1,2,3,4,5} )          | None                        | None                        |
+ .---------------------------------------------------------------,
+ | SUBSTITUTION                    | type of expr                |
+ |---------------------------------------------------------------|
+ | whatTheHellAreYou( initList )   | std::initializer_list<int>  |
+ | lval( {1,2,3,4,5} )             | None                        |
+ | lvalConst( {1,2,3,4,5} )        | None                        |
+ | lvalRef( {1,2,3,4,5} )          | None                        |
+ | lvalConstRef( {1,2,3,4,5} )     | None                        |
+ | rvalRef( {1,2,3,4,5} )          | None                        |
  '---------------------------------------------------------------------------------------------'
 ```
 
