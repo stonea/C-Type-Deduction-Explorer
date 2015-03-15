@@ -218,7 +218,7 @@ and the following variables:
  const int& constReference   = var;
 ```
 
-In **case 1** (Param-decl is neither a pointer or reference) we can see that whether a variable is a
+In **case 1** (Param-decl is neither a pointer nor reference) we can see that whether a variable is a
 const or reference doesn't matter to how `T` is deduced:
 
 ```
