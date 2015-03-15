@@ -398,8 +398,8 @@ And that's it!  See C++11 type deduction isn't too hairy.
 
 For more fun you may want to use the tool to see how functions and array types
 decay.  In other words take the following and put them into the
-`whatTheHellAreYou` macro and our template functions and see how the deduced
-types:
+`whatTheHellAreYou` macro and our template functions and see how the types are
+deduced:
 
 ``` C++
   int array[10];
