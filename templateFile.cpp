@@ -64,7 +64,6 @@ int main(int argc, char *argv[]) {
     int array[10];
     auto initList = {1,2,3,4,5};
     double fcn(int, int);
-    double (*)(int, int) fcnPtr = fcn;
 
     SUBSTITUTION_POINT
 }

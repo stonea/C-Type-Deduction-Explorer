@@ -83,8 +83,8 @@ This message shows that both `T` and `param` are inferred to be `const int&`.
 # How the tool helps
 
 Briefly, this tool calls g++ with `-std=c++11` and extracts error messages to
-generate tables like the one below.  Each row of the following table lists what
-C++11 deduces the value of `T and `x` to be when instantiating one of the
+generate tables like the one below.  Each row in the following table lists what
+C++11 deduces the value of `T` and `x` to be when instantiating one of the
 following templates.  
 
 ``` c++
@@ -109,7 +109,9 @@ template<typename T>
 void rvalRef(T&& x) { whatTheHellAreYou(x); }
 ```
 
-For example, if we were to call 'lvalRef(constValue)',  the lvalRef template will be instantiated with the type of `T` being `int` and the type of `x` being `const int&`.
+For example, if we were to call `lvalRef(constVar)`,  the `lvalRef` template
+will be instantiated with the type of `T` being `int` and the type of `x` (the
+parameter in the template) being `const int&`.
 
 <pre>
  .---------------------------------------------------------------------------,
@@ -145,7 +147,7 @@ For example, if we were to call 'lvalRef(constValue)',  the lvalRef template wil
 This script generates this table by substituting the value in the
 "SUBSTITUTION" column, in the place marked `SUBSTITUTION_POINT` in this file:
 <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/templateFile.cpp>.
-The script runs then runs the generated file through gcc, extracts type
+The script runs the generated file through gcc, extracts type
 information presented in the error messages, and presents the results to the
 user in tabular form.
 
@@ -161,10 +163,10 @@ For more details, read the comments at the top of the generator file <https://gi
 
 # So, let's learn some type deduction rules
 
-This section uses the Deduction Explorer tool to describe how C++11 deduces
+In this section I use the Deduction Explorer tool to describe how C++11 deduces
 types.  For a more complete description refer to Scott Meyers' "Effective
-Modern C++".  The information basically summarizes of the first two items in
-Scott Meyers' book.
+Modern C++".  The information here basically summarizes of the first two items
+of the book.
 
 In C++11, there are three different places type deduction occurs:
 
@@ -188,9 +190,9 @@ are different forms param-decl might take:
 The way template type deduction works differs depending on the form param-decl
 takes.  Specifically, whether 
 
-* (1) param-decl is neither a pointer nor reference, or if
-* (2) param-decl is to a pointer or reference type, or if
-* (3) param-decl is to a universal reference (That is T&&).
+* (1) param-decl is not qualified as either a pointer nor reference, or if
+* (2) param-decl is qualified as a pointer or reference type, or if
+* (3) param-decl is qualified as a universal reference (i.e. T&&).
 
 So, recall our four templates:
 
@@ -287,35 +289,35 @@ T will deduce to the reference `int&`.
 In this section imagine the following functions and variables:
 
 ``` c++
-    int returnInt() { return 42; }
-    int const returnConstInt() { return 42; }
-    int& returnRefToInt() { static var = 42; return var; }
-    int const & returnRefToConstInt()  { static var = 42; return var; }
+int returnInt() { return 42; }
+int const returnConstInt() { return 42; }
+int& returnRefToInt() { static var = 42; return var; }
+int const & returnRefToConstInt()  { static var = 42; return var; }
 
-    auto auto_var             = var;                         //            var is an:  int
-    auto auto_constVar        = constVar;                    //       constVar is an:  int const
-    auto auto_reference       = reference;                   //      reference is an:  int&
-    auto auto_constReference  = constReference;              // constReference is an:  int & const
+auto auto_var             = var;                         //            var is an:  int
+auto auto_constVar        = constVar;                    //       constVar is an:  int const
+auto auto_reference       = reference;                   //      reference is an:  int&
+auto auto_constReference  = constReference;              // constReference is an:  int & const
 
-    auto& auto_ref_var            = var;                     //            var is an:  int
-    auto& auto_ref_constVar       = constVar;                //       constVar is an:  int const
-    auto& auto_ref_reference      = reference;               //      reference is an:  int&
-    auto& auto_ref_constReference = constReference;          // constReference is an:  int & const
+auto& auto_ref_var            = var;                     //            var is an:  int
+auto& auto_ref_constVar       = constVar;                //       constVar is an:  int const
+auto& auto_ref_reference      = reference;               //      reference is an:  int&
+auto& auto_ref_constReference = constReference;          // constReference is an:  int & const
 
-    auto const & auto_cref_var            = var;             //            var is an:  int
-    auto const & auto_cref_constVar       = constVar;        //       constVar is an:  int const
-    auto const & auto_cref_reference      = reference;       //      reference is an:  int&
-    auto const & auto_cref_constReference = constReference;  // constReference is an:  int & const
+auto const & auto_cref_var            = var;             //            var is an:  int
+auto const & auto_cref_constVar       = constVar;        //       constVar is an:  int const
+auto const & auto_cref_reference      = reference;       //      reference is an:  int&
+auto const & auto_cref_constReference = constReference;  // constReference is an:  int & const
 
-    auto&& auto_rref_var            = var;              //            var is an:  int
-    auto&& auto_rref_constVar       = constVar;         //       constVar is an:  int const
-    auto&& auto_rref_reference      = reference;        //      reference is an:  int&
-    auto&& auto_rref_constReference = constReference;   // constReference is an:  int & const
-    auto&& auto_rref_42             = 42;               
-    auto&& auto_rref_rvalue_int     = returnInt();
-    auto&& auto_rref_rvalue_cint    = returnConstInt();
-    auto&& auto_rref_value_rint     = returnRefToInt();
-    auto&& auto_rref_value_crint    = returnRefToConstInt();
+auto&& auto_rref_var            = var;              //            var is an:  int
+auto&& auto_rref_constVar       = constVar;         //       constVar is an:  int const
+auto&& auto_rref_reference      = reference;        //      reference is an:  int&
+auto&& auto_rref_constReference = constReference;   // constReference is an:  int & const
+auto&& auto_rref_42             = 42;               
+auto&& auto_rref_rvalue_int     = returnInt();
+auto&& auto_rref_rvalue_cint    = returnConstInt();
+auto&& auto_rref_value_rint     = returnRefToInt();
+auto&& auto_rref_value_crint    = returnRefToConstInt();
 ```
 
 Auto type deduction works like template type deduction.  For auto's that are
@@ -333,8 +335,9 @@ will have it's 'const' and 'reference' qualifiers stripped away:
  '-----------------------------------------------------------'
 ```
 
-When we use `auto&` or `auto const&` (**case 2**), we can think of the reference is
-removed (if there was one) and then the qualifiers on auto being stuck on:
+When we use `auto&` or `auto const&` (**case 2**), we can think of the
+reference being removed (if there was one to begin with) and then the
+qualifiers on auto being stuck on.
 
 ```
  .----------------------------------------------------------------,
@@ -391,4 +394,14 @@ deduce to an initializor list, for templates the braces are an error:
  '---------------------------------------------------------------------------------------------'
 ```
 
+And that's it!  See C++11 type deduction isn't too hairy.
 
+For more fun you may want to use the tool to see how functions and array types
+decay.  In other words take the following and put them into the
+`whatTheHellAreYou` macro and our template functions and see how the deduced
+types:
+
+``` C++
+  int array[10];
+  double fcn(int, int);
+```
