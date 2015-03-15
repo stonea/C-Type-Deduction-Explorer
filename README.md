@@ -82,9 +82,9 @@ This message shows that both `T` and `param` are inferred to be `const int&`.
 
 # How the tool helps
 
-Briefly, this tool uses g++ with -std=c++11 to generate the below table.  Each
-row of the table lists what C++11 will deduce the value of T and x to be when
-instantiating one of the following templates.  
+Briefly, this tool uses g++ with -std=c++11 to generate the tables like the one
+below.  Each row of the table lists what C++11 will deduce the value of T and x
+to be when instantiating one of the following templates.  
 
 ``` c++
  int        var              = 1;
@@ -94,6 +94,9 @@ instantiating one of the following templates.
 
 template<typename T>
 void lval(T x) { whatTheHellAreYou(x); }
+
+template<typename T>
+void lvalConst(T const x) { whatTheHellAreYou(x); }
 
 template<typename T>
 void lvalRef(T& x) { whatTheHellAreYou(x); }
@@ -135,7 +138,7 @@ For example, if we were to call 'lvalRef(constValue)',  the lvalRef template wil
  | rvalRef( constReference )             | const int&                     | const int&                     |
  | rvalRef( 42 )                         | int                            | int&&                          |
  |                                       |                                |                                |
- `---------------------------------------------------------------------------------------------------------'
+ '---------------------------------------------------------------------------------------------------------'
 </pre>
  
 This script generates this table by substituting the value in the "SUBSTITUTION" column, in the place marked SUBSTITUTION_POINT in this file: <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/templateFile.cpp>.  The script runs the file through file is then run through gcc and type information is extracted in gcc's error messages.
@@ -144,6 +147,240 @@ This script generates this table by substituting the value in the "SUBSTITUTION"
 
 * Make sure you have gcc installed.  This tool is known to work with gcc 4.8.3.
 * To run just execute `generator.py`
-* To modify what is substituted, modify the 'substitutions' list in `generator.py`
+* To modify what is substituted, modify the 'substitutions' list in `generator.py`.
 
 For more details, read the comments at the top of the generator file <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/generator.py>.
+
+---
+
+# So, let's learn some type deduction rules
+
+This section uses the Deduction Explorer tool to describe how C++11 deduces
+types.  For a more complete description refer to Scott Meyers' "Effective
+Modern C++".  The information basically summarizes of the first three items in
+Scott Meyer's book.
+
+In C++11, there are three different places type deduction occurs:
+
+* In templates
+* With `auto`
+* With `decltype`
+
+In C++11 decltype simply resolves to the type that passed to it (its use as the
+returntype in template functions in C++14 is more interesting.) We'll explorer
+the first two of these cases individually:
+
+## Template Type Deduction
+
+Imagine a template: `template<typename T> void foo(...param-decel...)`.  There
+are different forms param-decl might take.  For example:
+
+* `template<typename T> void foo(T param)` (without any qualifiers)
+* `template<typename T> void foo(T* param)` (a pointer)
+* `template<typename T> void foo(T& param)` (an l-value reference)
+* `template<typename T> void foo(T&& param)` (a universal reference)
+
+The way template type deduction works differs in the following three cases:
+
+* (1) Param-decl is neither a pointer or reference
+* (2) Param-decl is to a pointer or reference type
+* (3) Param-decl is to a universal reference (That is T&&)
+
+So, recall our four templates:
+
+``` c++
+template<typename T>
+void lval(T x) { whatTheHellAreYou(x); }
+
+template<typename T>
+void lvalRef(T& x) { whatTheHellAreYou(x); }
+
+template<typename T>
+void lvalConstRef(T const & x) { whatTheHellAreYou(x); }
+
+template<typename T>
+void rvalRef(T&& x) { whatTheHellAreYou(x); }
+```
+
+and the following variables:
+``` c++
+ int        var              = 1;
+ const int  constValue       = 2;
+ int&       reference        = var;
+ const int& constReference   = var;
+```
+
+In **case 1** (Param-decl is neither a pointer or reference) we can see that whether a variable is a
+const or reference doesn't matter to how T is deduced:
+
+```
+ .-------------------------------------------------------------------------------------------------,
+ | SUBSTITUTION                  | type of T                      | type of expr                   |
+ |-------------------------------------------------------------------------------------------------|
+ | lval( var )                   | int                            | int                            |
+ | lval( constVar )              | int                            | int                            |
+ | lval( reference )             | int                            | int                            |
+ | lval( constReference )        | int                            | int                            |
+ | lval( 42 )                    | int                            | int                            |
+ |                               |                                |                                |
+ | lvalConst( var )              | int                            | const int                      |
+ | lvalConst( constVar )         | int                            | const int                      |
+ | lvalConst( reference )        | int                            | const int                      |
+ | lvalConst( constReference )   | int                            | const int                      |
+ | lvalConst( 42 )               | int                            | const int                      |
+ '-------------------------------------------------------------------------------------------------'
+```
+
+And why should it?  When you pass an argument in by value you make a copy of it so the template's
+parameter can be changed all it wants without modifying the actual argument.
+
+However, in **case 2** (Param-decl is to a pointer or reference type), T strips the
+reference of a variable (if there), then to get the type for param we stick a
+reference on.  Notice that 'const' is sticky: when a const is passed to the
+template it stays a const in the type of `T` and the type of `param`.  This
+make sense.  If we passed a constant-variable to a template by reference we
+would be suprised if the template were able to modify it!
+
+```
+ .---------------------------------------------------------------------------------------------------------,
+ | SUBSTITUTION                          | type of T                      | type of expr                   |
+ |---------------------------------------------------------------------------------------------------------|
+ | lvalRef( var )                        | int                            | int&                           |
+ | lvalRef( constVar )                   | const int                      | const int&                     |
+ | lvalRef( reference )                  | int                            | int&                           |
+ | lvalRef( constReference )             | const int                      | const int&                     |
+ | lvalRef( 42 )                         | int                            | int&                           |
+ '---------------------------------------------------------------------------------------------------------'
+```
+
+**Case 3** is a little bit less intuitive, but its critical to understand in
+order to understand C++11.  With universal references (see Item 24 in
+"Effective Modern C++") if what's passed in is an lvalue then T becomes an
+lvalue-reference, and if what's passed in is an rvalue T becomes an rvalue
+reference.  We can see an rvalue reference passed to a template that takes a
+universal reference, in the `rvalRef( 42 )` row in the following table.  Also
+note that even though var does not have a reference type (it's just an `int`),
+T will deduce to the reference `int&`.
+
+``` 
+ .-----------------------------------------------------------------------------------------------,
+ | SUBSTITUTION                | type of T                      | type of expr                   |
+ |-----------------------------------------------------------------------------------------------|
+ | rvalRef( var )              | int&                           | int&                           |
+ | rvalRef( constVar )         | const int&                     | const int&                     |
+ | rvalRef( reference )        | int&                           | int&                           |
+ | rvalRef( constReference )   | const int&                     | const int&                     |
+ | rvalRef( 42 )               | int                            | int&&                          |
+ '-----------------------------------------------------------------------------------------------'
+```
+ 
+## Auto Type Deduction
+
+In this section imagine the following functions and variables:
+
+``` c++
+    int returnInt() { return 42; }
+    int const returnConstInt() { return 42; }
+    int& returnRefToInt() { static var = 42; return var; }
+    int const & returnRefToConstInt()  { static var = 42; return var; }
+
+    auto auto_var             = var;                         //            var is an:  int
+    auto auto_constVar        = constVar;                    //       constVar is an:  int const
+    auto auto_reference       = reference;                   //      reference is an:  int&
+    auto auto_constReference  = constReference;              // constReference is an:  int & const
+
+    auto& auto_ref_var            = var;                     //            var is an:  int
+    auto& auto_ref_constVar       = constVar;                //       constVar is an:  int const
+    auto& auto_ref_reference      = reference;               //      reference is an:  int&
+    auto& auto_ref_constReference = constReference;          // constReference is an:  int & const
+
+    auto const & auto_cref_var            = var;             //            var is an:  int
+    auto const & auto_cref_constVar       = constVar;        //       constVar is an:  int const
+    auto const & auto_cref_reference      = reference;       //      reference is an:  int&
+    auto const & auto_cref_constReference = constReference;  // constReference is an:  int & const
+
+    auto&& auto_rref_var            = var;              //            var is an:  int
+    auto&& auto_rref_constVar       = constVar;         //       constVar is an:  int const
+    auto&& auto_rref_reference      = reference;        //      reference is an:  int&
+    auto&& auto_rref_constReference = constReference;   // constReference is an:  int & const
+    auto&& auto_rref_42             = 42;               
+    auto&& auto_rref_rvalue_int     = returnInt();
+    auto&& auto_rref_rvalue_cint    = returnConstInt();
+    auto&& auto_rref_value_rint     = returnRefToInt();
+    auto&& auto_rref_value_crint    = returnRefToConstInt();
+```
+
+Auto type deduction works like template type deduction.  For auto's that are
+not to a pointer, reference, or universal reference type (**case 1**), the deduced type
+will have it's 'const' and 'reference' qualifiers stripped away:
+
+```
+ .-----------------------------------------------------------------------------,
+ | SUBSTITUTION                               | type of expr                   |
+ |-----------------------------------------------------------------------------|
+ | whatTheHellAreYou( auto_var )              | int                            |
+ | whatTheHellAreYou( auto_constVar )         | int                            |
+ | whatTheHellAreYou( auto_reference )        | int                            |
+ | whatTheHellAreYou( auto_constReference )   | int                            |
+ '-----------------------------------------------------------------------------'
+```
+
+When we use `auto&` or `auto const&` (**case 2**), we can think of the reference is
+removed (if there was one) and then the qualifiers on auto being stuck on:
+
+```
+ .----------------------------------------------------------------------------------,
+ | SUBSTITUTION                                    | type of expr                   |
+ |----------------------------------------------------------------------------------|
+ |                                                 |                                |
+ | whatTheHellAreYou( auto_ref_var )               | int&                           |
+ | whatTheHellAreYou( auto_ref_constVar )          | const int&                     |
+ | whatTheHellAreYou( auto_ref_reference )         | int&                           |
+ | whatTheHellAreYou( auto_ref_constReference )    | const int&                     |
+ |                                                 |                                |
+ | whatTheHellAreYou( auto_cref_var )              | const int&                     |
+ | whatTheHellAreYou( auto_cref_constVar )         | const int&                     |
+ | whatTheHellAreYou( auto_cref_reference )        | const int&                     |
+ | whatTheHellAreYou( auto_cref_constReference )   | const int&                     |
+ '----------------------------------------------------------------------------------'
+```
+
+In **case 3**, as with template deduction, if what's assigned to auto&& is an l-value,
+the resulting type is an l-value reference, and if what's assigned to auto&& is an
+r-value, what results is an r-value.
+
+```
+ .----------------------------------------------------------------------------------,
+ | SUBSTITUTION                                    | type of expr                   |
+ |----------------------------------------------------------------------------------|
+ | whatTheHellAreYou( auto_rref_var )              | int&                           |
+ | whatTheHellAreYou( auto_rref_constVar )         | const int&                     |
+ | whatTheHellAreYou( auto_rref_reference )        | int&                           |
+ | whatTheHellAreYou( auto_rref_constReference )   | const int&                     |
+ | whatTheHellAreYou( auto_rref_42 )               | int&&                          |
+ | whatTheHellAreYou( auto_rref_rvalue_int )       | int&&                          |
+ | whatTheHellAreYou( auto_rref_rvalue_cint )      | int&&                          |
+ | whatTheHellAreYou( auto_rref_value_rint )       | int&                           |
+ | whatTheHellAreYou( auto_rref_value_crint )      | const int&                     |
+ '----------------------------------------------------------------------------------'
+```
+
+There is one way type deduction of auto differs with type deduction of
+templates: when things are enclosed in curly braces.  For auto curly braces
+deduce to an initializor list, for templates the braces are an error:
+
+```
+ .---------------------------------------------------------------------------------------------------,
+ | SUBSTITUTION                    | type of T                      | type of expr                   |
+ |---------------------------------------------------------------------------------------------------|
+ |                                 |                                |                                |
+ | whatTheHellAreYou( initList )   | None                           | std::initializer_list<int>     |
+ | lval( {1,2,3,4,5} )             | None                           | None                           |
+ | lvalConst( {1,2,3,4,5} )        | None                           | None                           |
+ | lvalRef( {1,2,3,4,5} )          | None                           | None                           |
+ | lvalConstRef( {1,2,3,4,5} )     | None                           | None                           |
+ | rvalRef( {1,2,3,4,5} )          | None                           | None                           |
+ '---------------------------------------------------------------------------------------------------'
+```
+
+

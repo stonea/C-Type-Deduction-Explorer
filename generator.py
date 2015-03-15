@@ -48,57 +48,82 @@ import re;
 
 # Substitutions to make.  Have fun and insert your own:
 # Have even more fun, change the code in 'templateFile.cpp'.
-substitutions = [
-                 "whatTheHellAreYou( var )",
-                 "whatTheHellAreYou( constVar )",
-                 "whatTheHellAreYou( reference )",
-                 "whatTheHellAreYou( constReference )",
-                 "whatTheHellAreYou( 42 )",
-                 "",
-                 "lvalRef( var )",
-                 "lvalRef( constVar )",
-                 "lvalRef( reference )",
-                 "lvalRef( constReference )",
-                 "lvalRef( 42 )",
-                 "",
-                 "lvalConstRef( var )",
-                 "lvalConstRef( constVar )",
-                 "lvalConstRef( reference )",
-                 "lvalConstRef( constReference )",
-                 "lvalConstRef( 42 )",
-                 "",
-                 "rvalRef( var )",
-                 "rvalRef( constVar )",
-                 "rvalRef( reference )",
-                 "rvalRef( constReference )",
-                 "rvalRef( 42 )",
-                 ""
-                 #"whatTheHellAreYou( auto_var )",
-                 #"whatTheHellAreYou( auto_constVar )",
-                 #"whatTheHellAreYou( auto_reference )",
-                 #"whatTheHellAreYou( auto_constReference )",
-                 #"",
-                 #"whatTheHellAreYou( auto_ref_var )",
-                 #"whatTheHellAreYou( auto_ref_constVar )",
-                 #"whatTheHellAreYou( auto_ref_reference )",
-                 #"whatTheHellAreYou( auto_ref_constReference )",
-                 #"",
-                 #"whatTheHellAreYou( auto_cref_var )",
-                 #"whatTheHellAreYou( auto_cref_constVar )",
-                 #"whatTheHellAreYou( auto_cref_reference )",
-                 #"whatTheHellAreYou( auto_cref_constReference )"
-                 #"",
-                 #"whatTheHellAreYou( array )",
-                 #"justVal( array )",
-                 #"lval( array )",
-                 #"" ,
-                 #"whatTheHellAreYou( initList )",
-                 #"justVal( initList )",
-                 #"lval( initList )",
-                 #"" ,
-                 #"whatTheHellAreYou( fcn )",
-                 #"justVal( fcn )",
-                 #"lval( fcn )",
+substitutions = [""
+                 # "whatTheHellAreYou( var )"
+                 #,"whatTheHellAreYou( constVar )"
+                 #,"whatTheHellAreYou( reference )"
+                 #,"whatTheHellAreYou( constReference )"
+                 #,"whatTheHellAreYou( 42 )"
+                 #,""
+                 #,"lvalRef( var )"
+                 #,"lvalRef( constVar )"
+                 #,"lvalRef( reference )"
+                 #,"lvalRef( constReference )"
+                 #,"lvalRef( 42 )"
+                 #,""
+                 #,"lval( var )"
+                 #,"lval( constVar )"
+                 #,"lval( reference )"
+                 #,"lval( constReference )"
+                 #,"lval( 42 )"
+                 #,""
+                 #,"lvalConst( var )"
+                 #,"lvalConst( constVar )"
+                 #,"lvalConst( reference )"
+                 #,"lvalConst( constReference )"
+                 #,"lvalConst( 42 )"
+                 #,""
+                 #,"lvalConstRef( var )"
+                 #,"lvalConstRef( constVar )"
+                 #,"lvalConstRef( reference )"
+                 #,"lvalConstRef( constReference )"
+                 #,"lvalConstRef( 42 )"
+                 #,""
+                 #,"rvalRef( var )"
+                 #,"rvalRef( constVar )"
+                 #,"rvalRef( reference )"
+                 #,"rvalRef( constReference )"
+                 #,"rvalRef( 42 )"
+                 #,""
+                 #,"whatTheHellAreYou( auto_var )"
+                 #,"whatTheHellAreYou( auto_constVar )"
+                 #,"whatTheHellAreYou( auto_reference )"
+                 #,"whatTheHellAreYou( auto_constReference )"
+                 #,""
+                 #,"whatTheHellAreYou( auto_ref_var )"
+                 #,"whatTheHellAreYou( auto_ref_constVar )"
+                 #,"whatTheHellAreYou( auto_ref_reference )"
+                 #,"whatTheHellAreYou( auto_ref_constReference )"
+                 #,""
+                 #,"whatTheHellAreYou( auto_cref_var )"
+                 #,"whatTheHellAreYou( auto_cref_constVar )"
+                 #,"whatTheHellAreYou( auto_cref_reference )"
+                 #,"whatTheHellAreYou( auto_cref_constReference )"
+                 #, ""
+                 #,"whatTheHellAreYou( auto_rref_var )"
+                 #,"whatTheHellAreYou( auto_rref_constVar )"
+                 #,"whatTheHellAreYou( auto_rref_reference )"
+                 #,"whatTheHellAreYou( auto_rref_constReference )"
+                 #,"whatTheHellAreYou( auto_rref_42 )"
+                 #,"whatTheHellAreYou( auto_rref_rvalue_int )"
+                 #,"whatTheHellAreYou( auto_rref_rvalue_cint )"
+                 #,"whatTheHellAreYou( auto_rref_value_rint )"
+                 #,"whatTheHellAreYou( auto_rref_value_crint )"
+                 #,""
+                 #,"whatTheHellAreYou( array )"
+                 #,"justVal( array )"
+                 #,"lval( array )"
+                 #,""
+                 ,"whatTheHellAreYou( initList )"
+                 ,"lval( {1,2,3,4,5} )"
+                 ,"lvalConst( {1,2,3,4,5} )"
+                 ,"lvalRef( {1,2,3,4,5} )"
+                 ,"lvalConstRef( {1,2,3,4,5} )"
+                 ,"rvalRef( {1,2,3,4,5} )"
+                 #,""
+                 #,"whatTheHellAreYou( fcn )"
+                 #,"justVal( fcn )"
+                 #,"lval( fcn )"
                 ];
 
 #-------------------------------
