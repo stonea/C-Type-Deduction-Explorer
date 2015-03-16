@@ -140,7 +140,6 @@ parameter in the template) being `const int&`.
  | rvalRef( reference )                  | int&            | int&            |
  | rvalRef( constReference )             | const int&      | const int&      |
  | rvalRef( 42 )                         | int             | int&&           |
- |                                       |                 |                 |
  '---------------------------------------------------------------------------'
 </pre>
  
@@ -154,7 +153,7 @@ user in tabular form.
 # How to Use
 
 * Make sure you have gcc installed.  This tool is known to work with gcc 4.8.3.
-* To run just execute `generator.py`
+* To run just execute `python generator.py`
 * To modify what is substituted, modify the 'substitutions' list in `generator.py`.
 
 For more details, read the comments at the top of the generator file <https://github.com/stonea/C-Type-Deduction-Explorer/blob/master/generator.py>.
